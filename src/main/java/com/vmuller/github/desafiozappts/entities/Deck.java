@@ -21,7 +21,8 @@ public class Deck implements Serializable {
     @JoinColumn(name = "list_Card_id")
     private List<Card> cards;
 
-    private Integer numberOfCards;
+    @Column
+    private Integer numberOfCards = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "player_id")
@@ -33,9 +34,7 @@ public class Deck implements Serializable {
     public Deck(List<Card> cards, Player player) {
         this.cards = cards;
         this.player = player;
-        for(Card c : cards){
-            numberOfCards += c.getQuantity();
-        }
+        //numberOfCards = 0;
     }
 
     public List<Card> getCards() {

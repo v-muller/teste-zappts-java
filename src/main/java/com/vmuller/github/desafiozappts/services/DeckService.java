@@ -1,8 +1,9 @@
 package com.vmuller.github.desafiozappts.services;
 
+import com.vmuller.github.desafiozappts.entities.Card;
 import com.vmuller.github.desafiozappts.entities.Deck;
 import com.vmuller.github.desafiozappts.repositories.CardRepository;
-import com.vmuller.github.desafiozappts.repositories.ListCardRepository;
+import com.vmuller.github.desafiozappts.repositories.DeckRepository;
 import com.vmuller.github.desafiozappts.services.Exceptions.ObjectNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,47 +16,57 @@ import java.util.UUID;
 
 @Service
 public class DeckService {
-    private final ListCardRepository listCardRepository;
+    private final DeckRepository deckRepository;
     private final CardRepository cardRepository;
 
 
-    public DeckService(ListCardRepository listCardRepository, CardRepository cardRepository) {
-        this.listCardRepository = listCardRepository;
+    public DeckService(DeckRepository deckRepository, CardRepository cardRepository) {
+        this.deckRepository = deckRepository;
         this.cardRepository = cardRepository;
     }
 
     public Page<Deck> findAll(Pageable pageable){
-        return listCardRepository.findAll(pageable);
+        return deckRepository.findAll(pageable);
     }
 
-    public Deck findById(UUID id){
-        Optional<Deck> obj = listCardRepository.findById(id);
-        return obj.orElseThrow(() -> new ObjectNotFoundException("Objeto não encontrado"));
+    public Optional<Deck> findById(UUID id){
+
+        return deckRepository.findById(id);
     }
 
     @Transactional
     public Deck save(Deck deck){
+        for(Card c : deck.getCards()){
+            deck.setNumberOfCards(deck.getNumberOfCards() + c.getQuantity());
+        }
         cardRepository.saveAll(deck.getCards());
 
-        return listCardRepository.save(deck);
+        return deckRepository.save(deck);
     }
 
     @Transactional
-    public List<Deck> saveAll(List<Deck> cards){
+    public List<Deck> saveAll(List<Deck> decks){
+        addNumberOfCardsOnDeck(decks);
 
+        return deckRepository.saveAll(decks);
+    }
 
-        return listCardRepository.saveAll(cards);
+    private void addNumberOfCardsOnDeck(List<Deck> decks){
+        for(Deck d : decks){
+            for(Card c : d.getCards()){
+                d.setNumberOfCards(d.getNumberOfCards() + c.getQuantity());
+            }
+        }
     }
 
     @Transactional
     public void delete(UUID id){
-        listCardRepository.deleteById(id);
+        deckRepository.deleteById(id);
     }
 
-    public Deck update(Deck cards){
-        Deck newObj = findById(cards.getId());
+    public Deck update(Deck deck){
 
-        return listCardRepository.save(newObj);
+        return deckRepository.save(deck);
     }
 
 }

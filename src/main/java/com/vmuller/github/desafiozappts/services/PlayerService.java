@@ -8,6 +8,9 @@ import com.vmuller.github.desafiozappts.repositories.PlayerRepository;
 import com.vmuller.github.desafiozappts.services.Exceptions.ObjectNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -16,7 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class PlayerService{
+public class PlayerService implements UserDetailsService {
 
     private final PlayerRepository playerRepository;
 
@@ -42,4 +45,9 @@ public class PlayerService{
     }
 
 
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return Optional.ofNullable(playerRepository.findByEmail(email))
+                .orElseThrow(() -> new UsernameNotFoundException("User not found."));
+    }
 }

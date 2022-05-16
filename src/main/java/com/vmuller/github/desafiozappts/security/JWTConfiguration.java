@@ -1,6 +1,6 @@
 package com.vmuller.github.desafiozappts.security;
 
-import com.vmuller.github.desafiozappts.services.PlayerDetailService;
+import com.vmuller.github.desafiozappts.services.PlayerService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -9,35 +9,37 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Log4j2
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
 public class JWTConfiguration extends WebSecurityConfigurerAdapter {
 
-   /* private final PlayerDetailService playerDetailService;
-    private final PasswordEncoder encoder;
 
-    public JWTConfiguration(PlayerDetailService playerDetailService, PasswordEncoder encoder) {
-        this.playerDetailService = playerDetailService;
-        this.encoder = encoder;
-    }*/
+    private final PlayerService playerService;
+
+    public JWTConfiguration(PlayerService playerService) {
+        this.playerService = playerService;
+    }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         //auth.userDetailsService(playerDetailService).passwordEncoder(encoder);
         PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
         log.info("password: ", passwordEncoder.encode("muller"));
-        auth.inMemoryAuthentication()
+        auth.userDetailsService(playerService)
+                .passwordEncoder(passwordEncoder);
+               // .and()
+                auth.inMemoryAuthentication()
                 .withUser("vinicio")
                 .password(passwordEncoder.encode("muller"))
-                .roles("USER", "ADMIN");
+                .roles("USER", "ADMIN")
+                .and();
     }
 
     @Override
@@ -55,11 +57,17 @@ public class JWTConfiguration extends WebSecurityConfigurerAdapter {
                 .addFilter(new JWTValidationFilter(authenticationManager()))
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);*/
 
-        http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .and()
+        http.csrf().disable()
+//                csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+//                .and()
                 .authorizeRequests()
+                .antMatchers( "/players/names").hasRole("USER")
+                .antMatchers(HttpMethod.POST, "/login").permitAll()
+                .antMatchers(HttpMethod.POST, "/players").permitAll()
                 .anyRequest()
                 .authenticated()
+                .and()
+                .formLogin()
                 .and()
                 .httpBasic();
     }

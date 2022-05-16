@@ -10,5 +10,5 @@ import java.util.UUID;
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, UUID> {
 
-    Optional<Player> findByEmail(String email);
+    Player findByEmail(String email);
 }

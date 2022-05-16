@@ -1,18 +1,20 @@
 package com.vmuller.github.desafiozappts.controllers;
 
+import com.vmuller.github.desafiozappts.dtos.PlayerDTO;
 import com.vmuller.github.desafiozappts.entities.Card;
 import com.vmuller.github.desafiozappts.entities.Deck;
 import com.vmuller.github.desafiozappts.entities.Player;
 import com.vmuller.github.desafiozappts.services.CardService;
 import com.vmuller.github.desafiozappts.services.DeckService;
 import com.vmuller.github.desafiozappts.services.PlayerService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +31,7 @@ public class PlayerController {
     private final PlayerService playerService;
     private final DeckService deckService;
     private final CardService cardService;
-    //private final PasswordEncoder encoder;
+    private final PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
     public PlayerController(PlayerService playerService, DeckService deckService, CardService cardService) {
         this.playerService = playerService;
@@ -37,13 +39,14 @@ public class PlayerController {
         this.cardService = cardService;
         //this.encoder = encoder;
         //, PasswordEncoder encoder - colocar no parametro
+
     }
 
 
     @Transactional
     @PostMapping
     public ResponseEntity<Object> savePlayer(@RequestBody @Valid Player player){
-        //player.setPassword(encoder.encode(player.getPassword()));
+        player.setPassword(passwordEncoder.encode(player.getPassword()));
 
         for(Deck c : player.getDecks()){
             cardService.saveAll(c.getCards());
@@ -52,21 +55,13 @@ public class PlayerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(playerService.save(player));
     }
 
-    @PostMapping(path = "/save")
-    public ResponseEntity<Object> savePlayerOnly(@RequestBody  Player player){
-        //player.setPassword(encoder.encode(player.getPassword()));
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(playerService.save(player));
-    }
-
     @GetMapping("/names")
-    public ResponseEntity<Page<Player>> getAll(@PageableDefault(page=0, size = 12, sort="name",
+    public ResponseEntity<Page<Player>> getAll(@PageableDefault(page=0, size = 12, sort="decks",
             direction = Sort.Direction.ASC ) Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(playerService.findAll(pageable));
     }
 
-    @DeleteMapping(path = ("{id}"))
-    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping(path = ("/delete/{id}"))
     public ResponseEntity<Object> deletePlayer(@PathVariable(value = "id") UUID id){
         Optional<Player> playerOptional = playerService.findById(id);
         if(!playerOptional.isPresent()){
@@ -82,5 +77,18 @@ public class PlayerController {
         return ResponseEntity.status(HttpStatus.OK).body("Player deleted successfully.");
     }
 
+    @PutMapping(path = "/{id}")
+    public ResponseEntity<Object> updatePlayer(@PathVariable(value = "id") UUID id,
+                                               @RequestBody @Valid PlayerDTO playerDTO){
+        Optional<Player> playerOptional = playerService.findById(id);
 
+        if(!playerOptional.isPresent()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found.");
+        }
+
+        var player = new Player();
+        BeanUtils.copyProperties(playerDTO, player);
+        player.setId(playerOptional.get().getId());
+        return ResponseEntity.status(HttpStatus.OK).body(playerService.save(player));
+    }
 }
