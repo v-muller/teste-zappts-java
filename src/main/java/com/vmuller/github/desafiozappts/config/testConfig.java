@@ -13,9 +13,8 @@ import org.springframework.context.annotation.Profile;
 
 import java.util.Arrays;
 
-@Configuration
-@Profile("test")
-public class testConfig implements CommandLineRunner {
+
+public class testConfig implements CommandLineRunner  {
     @Autowired
     PlayerRepository playerRepository;
     @Autowired
@@ -43,10 +42,10 @@ public class testConfig implements CommandLineRunner {
         p4.getDecks().add(d4);
 
 
-        Card c1 = new Card("Black Lotus", "1993", "portuguese", false, 830005.0, 1, new Deck());
-        Card c2 = new Card("Time Walk", "1998", "Portugues", true, 68000.0, 2, new Deck());
-        Card c3 = new Card("Ancestral Recall", "2001", "Portugues", true, 75000.9, 4, new Deck());
-        Card c4 = new Card("Underground Sea", "1997", "Portugues", false, 95500.0, 5, new Deck());
+        Card c1 = new Card("Black Lotus", "1993", "portuguese", false, 830005.0, 1, d1);
+        Card c2 = new Card("Time Walk", "1998", "Portugues", true, 68000.0, 2, d1);
+        Card c3 = new Card("Ancestral Recall", "2001", "Portugues", true, 75000.9, 4, d2);
+        Card c4 = new Card("Underground Sea", "1997", "Portugues", false, 95500.0, 5, d2);
         Card c5= new Card("Mox Jet", "1999", "Portugues", true, 69000.0, 2, d3);
         Card c6 = new Card("Timetwister", "2002", "Portugues", true, 68000.0, 8, d3);
         Card c7 = new Card("Mox Sapphire", "2000", "Portugues", true, 60000.0, 1, d4);
