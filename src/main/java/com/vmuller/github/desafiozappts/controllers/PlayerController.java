@@ -1,12 +1,13 @@
 package com.vmuller.github.desafiozappts.controllers;
 
-import com.vmuller.github.desafiozappts.dtos.PlayerDTO;
 import com.vmuller.github.desafiozappts.entities.Card;
 import com.vmuller.github.desafiozappts.entities.Deck;
 import com.vmuller.github.desafiozappts.entities.Player;
 import com.vmuller.github.desafiozappts.services.CardService;
 import com.vmuller.github.desafiozappts.services.DeckService;
 import com.vmuller.github.desafiozappts.services.PlayerService;
+import io.swagger.v3.oas.annotations.Parameter;
+import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +28,6 @@ import java.util.UUID;
 @RequestMapping(value = "/players")
 public class PlayerController {
 
-
     private final PlayerService playerService;
     private final DeckService deckService;
     private final CardService cardService;
@@ -37,58 +37,66 @@ public class PlayerController {
         this.playerService = playerService;
         this.deckService = deckService;
         this.cardService = cardService;
-        //this.encoder = encoder;
-        //, PasswordEncoder encoder - colocar no parametro
-
     }
 
-
-    @Transactional
     @PostMapping
-    public ResponseEntity<Object> savePlayer(@RequestBody @Valid Player player){
-        player.setPassword(passwordEncoder.encode(player.getPassword()));
+    public ResponseEntity<Player> savePlayer(@RequestBody @Valid Player player){
 
-        for(Deck c : player.getDecks()){
-            cardService.saveAll(c.getCards());
-        }
-        deckService.saveAll(player.getDecks());
-        return ResponseEntity.status(HttpStatus.CREATED).body(playerService.save(player));
+
+        var obj = new Player();
+        player.setId(obj.getId());
+        BeanUtils.copyProperties(player, obj);
+        obj.setPassword(passwordEncoder.encode(player.getPassword()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(playerService.save(obj));
     }
 
     @GetMapping("/names")
-    public ResponseEntity<Page<Player>> getAll(@PageableDefault(page=0, size = 12, sort="decks",
-            direction = Sort.Direction.ASC ) Pageable pageable){
+    public ResponseEntity<Page<Player>> findAll(@ParameterObject Pageable pageable){
         return ResponseEntity.status(HttpStatus.OK).body(playerService.findAll(pageable));
     }
 
-    @DeleteMapping(path = ("/delete/{id}"))
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> findById(@PathVariable(value = "id") UUID id){
+        Optional<Player> playerOptional = playerService.findById(id);
+        if(!playerOptional.isPresent()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found.");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(playerService.findById(id));
+    }
+
+    @Transactional
+    @DeleteMapping(path = ("/{id}"))
     public ResponseEntity<Object> deletePlayer(@PathVariable(value = "id") UUID id){
         Optional<Player> playerOptional = playerService.findById(id);
         if(!playerOptional.isPresent()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found.");
         }
-        for(Deck d : playerOptional.get().getDecks()){
-            for(Card c : d.getCards()){
-                cardService.delete(c.getId());
+
+        if(!playerOptional.get().getDecks().isEmpty())
+            for(Deck d : playerOptional.get().getDecks()){
+                if(!d.getCards().isEmpty())
+                    for(Card c : d.getCards()){
+                        cardService.deleteByid(c.getId());
+                    }
+                deckService.delete(d.getId());
             }
-            deckService.delete(d.getId());
-        }
         playerService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).body("Player deleted successfully.");
     }
 
     @PutMapping(path = "/{id}")
     public ResponseEntity<Object> updatePlayer(@PathVariable(value = "id") UUID id,
-                                               @RequestBody @Valid PlayerDTO playerDTO){
+                                               @RequestBody @Valid Player player){
         Optional<Player> playerOptional = playerService.findById(id);
 
         if(!playerOptional.isPresent()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Player not found.");
         }
 
-        var player = new Player();
-        BeanUtils.copyProperties(playerDTO, player);
-        player.setId(playerOptional.get().getId());
-        return ResponseEntity.status(HttpStatus.OK).body(playerService.save(player));
+        var obj = new Player();
+        BeanUtils.copyProperties(player, obj);
+        obj.setId(playerOptional.get().getId());
+        return ResponseEntity.status(HttpStatus.OK).body(playerService.save(obj));
     }
 }

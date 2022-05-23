@@ -1,7 +1,7 @@
 package com.vmuller.github.desafiozappts.entities;
 
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,10 +11,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
@@ -30,25 +27,18 @@ public class Player implements Serializable, UserDetails {
     private String name;
     @Email
     private String email;
-    @Column(nullable = false)
-   // @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(nullable = false, length = 10)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "player_id")
-    private List<Deck> decks;
+    @JsonIgnore
+    @OneToMany(mappedBy = "player", fetch = FetchType.LAZY, cascade = {CascadeType.DETACH})
+    private List<Deck> decks = new ArrayList<>();
 
     private String authorities = "ROLE_USER";
 
     public Player(){}
-
-    public Player(String name, String email, String password, List<Deck> decks) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.decks = decks;
-    }
 
     public Player(String name, String email, String password) {
         this.name = name;

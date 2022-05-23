@@ -1,6 +1,5 @@
 package com.vmuller.github.desafiozappts.services;
 
-import com.vmuller.github.desafiozappts.dtos.CardDTO;
 import com.vmuller.github.desafiozappts.entities.Card;
 import com.vmuller.github.desafiozappts.entities.Deck;
 

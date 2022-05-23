@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface DeckRepository extends JpaRepository<Deck, UUID> {
+public interface DeckRepository extends JpaRepository<Deck, UUID>{
 }

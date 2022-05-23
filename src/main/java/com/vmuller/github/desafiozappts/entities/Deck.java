@@ -5,11 +5,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "TB_LIST_CARDS")
+@Table(name = "TB_DECKS")
 public class Deck implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -17,24 +18,20 @@ public class Deck implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "list_Card_id")
-    private List<Card> cards;
 
-    @Column
-    private Integer numberOfCards = 0;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "player_id")
     @JsonIgnore
+    @OneToMany(mappedBy = "deck", fetch = FetchType.LAZY)
+    private List<Card> cards = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "player_id")
     private Player player;
 
     public Deck(){}
 
-    public Deck(List<Card> cards, Player player) {
+    public Deck(Player player) {
         this.cards = cards;
         this.player = player;
-        //numberOfCards = 0;
     }
 
     public List<Card> getCards() {
@@ -53,11 +50,11 @@ public class Deck implements Serializable {
         this.id = id;
     }
 
-    public Integer getNumberOfCards() {
-        return numberOfCards;
+    public Player getPlayer() {
+        return player;
     }
 
-    public void setNumberOfCards(Integer numberOfCards) {
-        this.numberOfCards = numberOfCards;
+    public void setPlayer(Player player) {
+        this.player = player;
     }
 }

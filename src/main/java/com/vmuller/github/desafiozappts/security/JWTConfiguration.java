@@ -57,6 +57,7 @@ public class JWTConfiguration extends WebSecurityConfigurerAdapter {
                 .addFilter(new JWTValidationFilter(authenticationManager()))
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);*/
 
+        http.headers().frameOptions().disable();
         http.csrf().disable()
 //                csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 //                .and()
@@ -64,6 +65,7 @@ public class JWTConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers( "/players/names").hasRole("USER")
                 .antMatchers(HttpMethod.POST, "/login").permitAll()
                 .antMatchers(HttpMethod.POST, "/players").permitAll()
+                .antMatchers( "/swagger**").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()

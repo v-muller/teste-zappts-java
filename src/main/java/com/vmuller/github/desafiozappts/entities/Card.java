@@ -2,8 +2,6 @@ package com.vmuller.github.desafiozappts.entities;
 
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 import java.io.Serial;
 import java.io.Serializable;
@@ -31,22 +29,21 @@ public class Card implements Serializable {
     @Column(nullable = false, length = 5)
     private Integer quantity;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "list_card_id")
-    @JsonIgnore
-    private Deck listCard;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "deck_id")
+    private Deck deck;
 
     public Card() {
     }
 
-    public Card(String name, String edition, String language, Boolean foil, Double price, Integer quantity, Deck listCard) {
+    public Card(String name, String edition, String language, Boolean foil, Double price, Integer quantity, Deck deck) {
         this.name = name;
         this.edition = edition;
         this.language = language;
         this.foil = foil;
         this.price = price;
         this.quantity = quantity;
-        this.listCard = listCard;
+        this.deck = deck;
     }
 
     public UUID getId() {
@@ -105,11 +102,11 @@ public class Card implements Serializable {
         this.quantity = quantity;
     }
 
-    public Deck getListCard() {
-        return listCard;
+    public Deck getDeck() {
+        return deck;
     }
 
-    public void setListCard(Deck listCard) {
-        this.listCard = listCard;
+    public void setDeck(Deck deck) {
+        this.deck = deck;
     }
 }
