@@ -133,6 +133,4 @@ class CardControllerTest {
         Assertions.assertThat(card.getStatusCode()).isEqualTo(HttpStatus.OK);
 
     }
-
-
 }

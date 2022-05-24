@@ -13,7 +13,8 @@ import org.springframework.context.annotation.Profile;
 
 import java.util.Arrays;
 
-
+@Configuration
+@Profile("test")
 public class testConfig implements CommandLineRunner  {
     @Autowired
     PlayerRepository playerRepository;

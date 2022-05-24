@@ -1,1 +1,1 @@
-web: java -jar target/desafiozappts-1.0.0.jar
+web: java -Dserver.port$PORT -jar target/desafiozappts-1.0.0.jar
