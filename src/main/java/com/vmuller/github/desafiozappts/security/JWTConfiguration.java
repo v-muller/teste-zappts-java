@@ -36,8 +36,8 @@ public class JWTConfiguration extends WebSecurityConfigurerAdapter {
                 .passwordEncoder(passwordEncoder);
                // .and()
                 auth.inMemoryAuthentication()
-                .withUser("vinicio")
-                .password(passwordEncoder.encode("muller"))
+                .withUser("admin")
+                .password(passwordEncoder.encode("admin"))
                 .roles("USER", "ADMIN")
                 .and();
     }
@@ -50,7 +50,6 @@ public class JWTConfiguration extends WebSecurityConfigurerAdapter {
 //                csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 //                .and()
                 .authorizeRequests()
-                .antMatchers( HttpMethod.GET).permitAll()
                 .antMatchers( "/players/names").hasRole("USER")
                 .antMatchers(HttpMethod.POST, "/login").permitAll()
                 .antMatchers(HttpMethod.POST, "/players").permitAll()
