@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,7 +16,6 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "TB_PLAYERS")
 public class Player implements Serializable, UserDetails {
-    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -27,7 +25,7 @@ public class Player implements Serializable, UserDetails {
     private String name;
     @Email
     private String email;
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 

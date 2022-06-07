@@ -3,7 +3,6 @@ package com.vmuller.github.desafiozappts.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "TB_DECKS")
 public class Deck implements Serializable {
-    @Serial
+
     private static final long serialVersionUID = 1L;
 
     @Id
